@@ -1,0 +1,8 @@
+01-Add internet permission (required for firebase)
+02-Add Register and Login Buttons in MainActivity
+03-Create RegisterActivity
+04-Create Firebase Project and connect app with that project
+05-Check google-services.json file to make sure app is connected with firebase
+06-User Registration using Email & Password
+07-Create ProfileActivity
+08-Go to Profile Activity After Register/Login
