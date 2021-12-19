@@ -5,12 +5,12 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:padding="20dp"
-    tools:context=".RegisterActivity">
+    tools:context=".LoginActivity">
 
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Register"
+        android:text="Login"
         android:textAlignment="center"
         android:textColor="@color/black"
         android:textSize="25sp" />
@@ -23,7 +23,7 @@
         android:layout_centerVertical="true">
 
         <EditText
-            android:id="@+id/edtEmail"
+            android:id="@+id/edtEmail1"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:hint="Email"
@@ -40,7 +40,7 @@
         app:passwordToggleEnabled="true">
 
         <EditText
-            android:id="@+id/edtPassword"
+            android:id="@+id/edtPassword1"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:hint="Password"
@@ -48,21 +48,21 @@
     </com.google.android.material.textfield.TextInputLayout>
 
     <Button
-        android:id="@+id/btnRegister"
+        android:id="@+id/btnLogin1"
         style="@style/Widget.AppCompat.Button.Colored"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_below="@id/passwordTitle"
         android:layout_centerHorizontal="true"
-        android:text="Register" />
+        android:text="Login" />
 
     <TextView
-        android:id="@+id/tvHaveAccount"
+        android:id="@+id/tvNotHaveAccount"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_below="@id/btnRegister"
+        android:layout_below="@id/btnLogin1"
         android:layout_marginTop="30dp"
-        android:text="Already have account? Login"
+        android:text="Not have account? Register"
         android:textAlignment="center"
         android:textColor="@color/black" />
 
