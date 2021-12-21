@@ -7,7 +7,6 @@ import androidx.appcompat.app.AppCompatActivity;
 import android.app.ProgressDialog;
 import android.content.Intent;
 import android.os.Bundle;
-import android.util.Log;
 import android.util.Patterns;
 import android.view.View;
 import android.widget.Button;
@@ -21,8 +20,10 @@ import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
 
-import java.util.regex.Pattern;
+import java.util.HashMap;
 
 public class RegisterActivity extends AppCompatActivity {
 
@@ -98,12 +99,32 @@ public class RegisterActivity extends AppCompatActivity {
                             // Sign in success, bo qua dialog va tien hanh dang ky
                             progressDialog.dismiss();
                             FirebaseUser user = mAuth.getCurrentUser();
+                            //nhận email của người dùng và uid từ auth
+                            String email = user.getEmail();
+                            String uid = user.getUid();
+                            //khi người dùng được đăng ký, lưu trữ thông tin người dùng trong cơ sở dữ liệu thời gian thực của firebase
+                            //sử dụng hashmap
+                            HashMap<Object, String> hashMap = new HashMap<>();
+                            //đưa thông tin vào hasmap
+                            hashMap.put("email", email);
+                            hashMap.put("uid", uid);
+                            hashMap.put("name", "");
+                            hashMap.put("phone", "");
+                            hashMap.put("image", "");
+
+                            //firebase database instance
+                            FirebaseDatabase database = FirebaseDatabase.getInstance();
+                            //path to store user data name "users"
+                            DatabaseReference reference = database.getReference("Users");
+                            //put data within hasmap in database
+                            reference.child(uid).setValue(hashMap);
+
                             Toast.makeText(RegisterActivity.this, "Registered...\n" + user.getEmail(),
                                     Toast.LENGTH_SHORT).show();
-                            startActivity(new Intent(RegisterActivity.this, ProfileActivity.class));
+                            startActivity(new Intent(RegisterActivity.this, DashbroadActivity.class));
                             finish();
                         } else {
-                            // If sign in fails, display a message to the user.
+                            //Nếu đăng nhập không thành công, hiển thị thông báo cho người dùng.
                             progressDialog.dismiss();
                             Toast.makeText(RegisterActivity.this, "Authentication failed.",
                                     Toast.LENGTH_SHORT).show();

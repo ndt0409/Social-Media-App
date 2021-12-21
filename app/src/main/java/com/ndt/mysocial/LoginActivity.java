@@ -5,7 +5,6 @@ import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.app.AlertDialog;
-import android.app.Dialog;
 import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -33,6 +32,10 @@ import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.GoogleAuthProvider;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+
+import java.util.HashMap;
 
 public class LoginActivity extends AppCompatActivity {
 
@@ -194,7 +197,7 @@ public class LoginActivity extends AppCompatActivity {
                             pd.dismiss();
                             // Sign in success, update UI with the signed-in user's information
                             FirebaseUser user = mAuth.getCurrentUser();
-                            startActivity(new Intent(LoginActivity.this, ProfileActivity.class));
+                            startActivity(new Intent(LoginActivity.this, DashbroadActivity.class));
                             finish();
                         } else {
                             // If sign in fails, display a message to the user.
@@ -244,9 +247,29 @@ public class LoginActivity extends AppCompatActivity {
                         if (task.isSuccessful()) {
                             // Sign in success, update UI with the signed-in user's information
                             FirebaseUser user = mAuth.getCurrentUser();
+
+                            //nhận email của người dùng và uid từ auth
+                            String email = user.getEmail();
+                            String uid = user.getUid();
+                            //khi người dùng được đăng ký, lưu trữ thông tin người dùng trong cơ sở dữ liệu thời gian thực của firebase
+                            //sử dụng hashmap
+                            HashMap<Object, String> hashMap = new HashMap<>();
+                            //đưa thông tin vào hasmap
+                            hashMap.put("email", email);
+                            hashMap.put("uid", uid);
+                            hashMap.put("name", "");
+                            hashMap.put("phone", "");
+                            hashMap.put("image", "");
+
+                            //firebase database instance
+                            FirebaseDatabase database = FirebaseDatabase.getInstance();
+                            //path to store user data name "users"
+                            DatabaseReference reference = database.getReference("Users");
+                            //put data within hasmap in database
+                            reference.child(uid).setValue(hashMap);
                             Toast.makeText(LoginActivity.this, "" + user.getEmail(), Toast.LENGTH_SHORT).show();
                             //đến activity profile sau khi đăng nhập
-                            startActivity(new Intent(LoginActivity.this, ProfileActivity.class));
+                            startActivity(new Intent(LoginActivity.this, DashbroadActivity.class));
                             finish();
                             //updateUI(user);
                         } else {
