@@ -248,25 +248,27 @@ public class LoginActivity extends AppCompatActivity {
                             // Sign in success, update UI with the signed-in user's information
                             FirebaseUser user = mAuth.getCurrentUser();
 
-                            //nhận email của người dùng và uid từ auth
-                            String email = user.getEmail();
-                            String uid = user.getUid();
-                            //khi người dùng được đăng ký, lưu trữ thông tin người dùng trong cơ sở dữ liệu thời gian thực của firebase
-                            //sử dụng hashmap
-                            HashMap<Object, String> hashMap = new HashMap<>();
-                            //đưa thông tin vào hasmap
-                            hashMap.put("email", email);
-                            hashMap.put("uid", uid);
-                            hashMap.put("name", "");
-                            hashMap.put("phone", "");
-                            hashMap.put("image", "");
+                            if (task.getResult().getAdditionalUserInfo().isNewUser()) {
+                                //nhận email của người dùng và uid từ auth
+                                String email = user.getEmail();
+                                String uid = user.getUid();
+                                //khi người dùng được đăng ký, lưu trữ thông tin người dùng trong cơ sở dữ liệu thời gian thực của firebase
+                                //sử dụng hashmap
+                                HashMap<Object, String> hashMap = new HashMap<>();
+                                //đưa thông tin vào hasmap
+                                hashMap.put("email", email);
+                                hashMap.put("uid", uid);
+                                hashMap.put("name", "");
+                                hashMap.put("phone", "");
+                                hashMap.put("image", "");
 
-                            //firebase database instance
-                            FirebaseDatabase database = FirebaseDatabase.getInstance();
-                            //path to store user data name "users"
-                            DatabaseReference reference = database.getReference("Users");
-                            //put data within hasmap in database
-                            reference.child(uid).setValue(hashMap);
+                                //firebase database instance
+                                FirebaseDatabase database = FirebaseDatabase.getInstance();
+                                //path to store user data name "users"
+                                DatabaseReference reference = database.getReference("Users");
+                                //put data within hasmap in database
+                                reference.child(uid).setValue(hashMap);
+                            }
                             Toast.makeText(LoginActivity.this, "" + user.getEmail(), Toast.LENGTH_SHORT).show();
                             //đến activity profile sau khi đăng nhập
                             startActivity(new Intent(LoginActivity.this, DashbroadActivity.class));
