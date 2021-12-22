@@ -23,10 +23,15 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.Magnifier;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.android.gms.auth.api.signin.internal.Storage;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.Task;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -36,7 +41,11 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.storage.StorageReference;
+import com.google.firebase.storage.UploadTask;
 import com.squareup.picasso.Picasso;
+
+import java.util.HashMap;
 
 public class ProfileFragment extends Fragment {
 
@@ -45,6 +54,13 @@ public class ProfileFragment extends Fragment {
     FirebaseUser firebaseUser;
     FirebaseDatabase firebaseDatabase;
     DatabaseReference databaseReference;
+
+    //storage
+    StorageReference storageRefence;
+
+
+    //duong dan anh
+    String storagePath = "Users_Profile_Cover_Imgs/";
 
     //view xml
     ImageView tvAvatar, tvCover;
@@ -65,6 +81,9 @@ public class ProfileFragment extends Fragment {
 
     //Uri of picked image
     Uri image_uri;
+
+    //for checking profile or cover photo
+    String profileOrCoverPhoto;
 
     public ProfileFragment() {
         // Required empty public constructor
@@ -189,21 +208,36 @@ public class ProfileFragment extends Fragment {
                 if (which == 0) {
                     //edit profile clicked
                     pd.setMessage("Updating Profile Picture");
+                    profileOrCoverPhoto = "image";
                     showImagePicDialog();
                 } else if (which == 1) {
                     //edit cover clicked
                     pd.setMessage("Updating Cover Picture");
+                    profileOrCoverPhoto = "cover";
                 } else if (which == 2) {
                     //edit name clicked
                     pd.setMessage("Updating Name");
+                    //gọi phương thức và chuyển khóa "name" làm tham số để cập nhật nó là giá trị trong cơ sở dữ liệu
+                    showNamePhoneUpdateDialog("name");
                 } else if (which == 3) {
                     pd.setMessage("Updating Phone");
                     //edit phone clicked
+                    showNamePhoneUpdateDialog("phone");
                 }
             }
         });
         //tao va hien thi dialog
         builder.create().show();
+    }
+
+    private void showNamePhoneUpdateDialog(String key) {
+        //custom dialog
+        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+        builder.setTitle("Update" + key); //update name or update phone
+        //set layout of dialog
+        LinearLayout linearLayout = new LinearLayout(getActivity());
+        linearLayout.setOrientation(LinearLayout.VERTICAL);
+
     }
 
     private void showImagePicDialog() {
@@ -289,6 +323,47 @@ public class ProfileFragment extends Fragment {
     }
 
     private void uploadProfileCoverPhoto(Uri image_uri) {
+        pd.show();
+        //duong dan anh tu firebase storage
+        String filePathAndName = storagePath + "" + profileOrCoverPhoto + "" + firebaseUser.getUid();
+        StorageReference storageReference2nd = storageRefence.child(filePathAndName);
+        storageReference2nd.putFile(image_uri).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
+            @Override
+            public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+                Task<Uri> uriTask = taskSnapshot.getStorage().getDownloadUrl();
+                while (!uriTask.isSuccessful()) ;
+                Uri dowloadUri = uriTask.getResult();
+                //check if image    is uploaded  or not and url is received
+                if (uriTask.isSuccessful()) {
+                    //image uploaded
+                    //add/update url in user is database
+                    HashMap<String, Object> result = new HashMap<>();
+                    result.put(profileOrCoverPhoto, dowloadUri.toString());
+                    databaseReference.child(firebaseUser.getUid()).updateChildren(result).addOnSuccessListener(new OnSuccessListener<Void>() {
+                        @Override
+                        public void onSuccess(Void unused) {
+                            pd.dismiss();
+                            Toast.makeText(getActivity(), "Image update...", Toast.LENGTH_SHORT).show();
+                        }
+                    }).addOnFailureListener(new OnFailureListener() {
+                        @Override
+                        public void onFailure(@NonNull Exception e) {
+                            pd.dismiss();
+                            Toast.makeText(getActivity(), "Error update image...", Toast.LENGTH_SHORT).show();
+                        }
+                    });
+                } else {
+                    pd.dismiss();
+                    Toast.makeText(getActivity(), "loi", Toast.LENGTH_SHORT).show();
+                }
+            }
+        }).addOnFailureListener(new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull Exception e) {
+                pd.dismiss();
+                Toast.makeText(getActivity(), e.getMessage(), Toast.LENGTH_SHORT).show();
+            }
+        });
     }
 
     private void pickFromGallery() {
